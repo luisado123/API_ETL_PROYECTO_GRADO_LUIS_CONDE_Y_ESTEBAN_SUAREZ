@@ -12,7 +12,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<IUnitOfWork ,UnitOfWork>();
-builder.Services.AddSingleton<MongoConnectionRepository>();
+//builder.Services.AddSingleton<MongoConnectionRepository>();
 
 
 var app = builder.Build();

@@ -55,7 +55,14 @@ namespace API_ETL_PROYECTO_GRADO_LUIS_CONDE_Y_ESTEBAN_SUAREZ.Repositories
                 data.Add(rowData);
             }
 
-            return await Task.FromResult(Newtonsoft.Json.JsonConvert.SerializeObject(new { data }));
+   
+            var finalJsonRaw = new
+            {
+                data,
+                origin="CSV"
+            };
+
+            return await Task.FromResult(Newtonsoft.Json.JsonConvert.SerializeObject(finalJsonRaw));
         }
 
     }

@@ -6,7 +6,7 @@
         ISqlCollection SqlCollection { get; }
         IXslxCollection XslxCollection { get; set; }
 
-        //llamados a las demas interfaces en caso de tener mas formatos
-        void SaveUnprocessedDataToWarehousee();
+        IDataWarehouseRepository DataWarehouseRepository { get; set; }
+
     }
 }

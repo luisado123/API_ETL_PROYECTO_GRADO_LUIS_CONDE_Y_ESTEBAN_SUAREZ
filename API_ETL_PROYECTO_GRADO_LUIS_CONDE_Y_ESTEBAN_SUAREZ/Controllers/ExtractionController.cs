@@ -5,6 +5,8 @@ using Microsoft.Data.Analysis;
 
 namespace API_ETL_PROYECTO_GRADO_LUIS_CONDE_Y_ESTEBAN_SUAREZ.Controllers
 {
+    [Route("api/[controller]")]
+    [ApiController]
     public class ExtractionController : Controller
     {
 
@@ -28,15 +30,12 @@ namespace API_ETL_PROYECTO_GRADO_LUIS_CONDE_Y_ESTEBAN_SUAREZ.Controllers
 
                 var csvData = await _unitOfWork.CsvCollection.ReadCsvAsync(filePath);
 
-
-                //List<Dictionary<string, object>> dataList = new List<Dictionary<string, object>>();
                 string JsonDataFrame =await _unitOfWork.CsvCollection.DataFrameToJsonAsync(csvData);
-
+               await _unitOfWork.DataWarehouseRepository.LoadSingleRawDataIntoStagingArea(JsonDataFrame);
                 return Ok(JsonDataFrame);
             }
             catch (Exception ex)
             {
-                // Maneja las excepciones según tus necesidades
                 return BadRequest(ex.Message);
             }
         }
@@ -54,45 +53,20 @@ namespace API_ETL_PROYECTO_GRADO_LUIS_CONDE_Y_ESTEBAN_SUAREZ.Controllers
                 }
 
                 var result = await _unitOfWork.XslxCollection.ReadExcelAsync(filePath);
-                var finalJsonObjectResult= new { data = result };
+                var finalJsonObjectResult= new { data = result, origin = "CSV" };
                 string XslxlJsonFormat = Newtonsoft.Json.JsonConvert.SerializeObject(finalJsonObjectResult);
 
                 return Ok(XslxlJsonFormat);
             }
             catch (Exception ex)
             {
-                // Maneja cualquier excepción según tus necesidades
                 return StatusCode(500, $"Error en la operación: {ex.Message}");
             }
         }
 
-        [HttpGet("read-sql/{filePath}")]
-        public async Task<IActionResult> ReadLocalScripSqlAsync(string filePath)
-        {
-            try
-            {
-
-                // Llama al método para ejecutar el script SQL
-                List<Dto.TableSqlDto> tablasScript = new List<TableSqlDto>();
-                 tablasScript= await _unitOfWork.SqlCollection.ReadLocalScriptSqlAsync(filePath);
-
-                if (tablasScript!=null && tablasScript.Count()>0)
-                {
-                    return Ok("Extracción de el script finalizada.");
-                }
-                else
-                {
-                    return BadRequest("El script esta vacio.");
-                }
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Error interno del servidor: {ex.Message}");
-            }
-        }
 
 
-        [HttpGet("ReadSqlEndpoint")]
+        [HttpPost("ReadSqlEndpoint")]
         public async Task<IActionResult> ReadRemoteSqlEndpoint(SqlEndpointParameters parameters)
         {
             try
@@ -103,25 +77,13 @@ namespace API_ETL_PROYECTO_GRADO_LUIS_CONDE_Y_ESTEBAN_SUAREZ.Controllers
                     return BadRequest("Los parámetros connectionString y databaseName son requeridos.");
                 }
 
-                // Combina el databaseName con el connectionString
-                var connectionStringWithDatabase = $"{parameters.ConnectionString};Database={parameters.DatabaseName}";
-
-                // Crea una instancia de SqlConnectionRepository
-                var sqlConnectionContext = new SqlConnectionRepository(connectionStringWithDatabase);
-
                 var sqlCollection = _unitOfWork.SqlCollection;
-            
-                List<TableSqlDto> tablesCollectionRaw= new List<TableSqlDto>();
-                tablesCollectionRaw = await sqlCollection.ReadRemoteSqlEndpointAsync(sqlConnectionContext);
-
-                // Realizar operaciones con la instancia de unitOfWork
-                // ...
-
+                string SQLDataToJSON =  await sqlCollection.ReadRemoteSqlEndpointAsync(parameters.ConnectionString);
+                await _unitOfWork.DataWarehouseRepository.LoadSingleRawDataIntoStagingArea(SQLDataToJSON);
                 return Ok("Operación exitosa");
             }
             catch (Exception ex)
             {
-                // Manejar cualquier excepción según tus necesidades
                 return StatusCode(500, $"Error en la operación: {ex.Message}");
             }
         }

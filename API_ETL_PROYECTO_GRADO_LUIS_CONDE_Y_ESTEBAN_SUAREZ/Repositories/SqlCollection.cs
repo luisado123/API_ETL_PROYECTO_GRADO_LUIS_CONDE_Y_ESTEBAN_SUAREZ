@@ -8,107 +8,140 @@ using System.Threading.Tasks;
 using System.Data;
 using System.Text.RegularExpressions;
 using Newtonsoft.Json;
+using API_ETL_PROYECTO_GRADO_LUIS_CONDE_Y_ESTEBAN_SUAREZ.Controllers;
+using System.Data.SqlClient;
+using Newtonsoft.Json.Linq;
 
 namespace API_ETL_PROYECTO_GRADO_LUIS_CONDE_Y_ESTEBAN_SUAREZ.Repositories
 {
     public class SqlCollection : ISqlCollection
     {
-   
 
-        public async Task<List<Dto.TableSqlDto>> ReadLocalScriptSqlAsync(string scriptFilePath)
+        public SqlConnection CreateSqlConnection(string _connectionString)
         {
-            try
-            {
-                string script;
-
-                // Lee el contenido del archivo SQL
-                using (StreamReader reader = new StreamReader(scriptFilePath))
-                {
-                    script = await reader.ReadToEndAsync();
-                }
-                var a= ExtractTuples(script);
-                // Procesa el script SQL y extrae la información de las tablas
-                List<Dto.TableSqlDto> tableInfoList = new List<Dto.TableSqlDto>();
-
-                // Implementa la lógica para analizar el script SQL y obtener la información de las tablas.
-                // Por ejemplo, puedes buscar patrones en el script que representen definiciones de tablas y columnas.
-
-                // Ejemplo de cómo agregar información de una tabla a la lista:
-                var table = new TableSqlDto
-                {
-                    TableName = "NombreDeLaTabla",
-                    Columns = new List<string> { "Columna1", "Columna2", "Columna3" }
-                    // Agrega las columnas según corresponda
-                };
-                tableInfoList.Add(table);
-
-                Console.WriteLine("Script SQL local ejecutado con éxito de forma asíncrona.");
-
-                // Devuelve la lista de información de tablas en formato JSON
-                return tableInfoList;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Error al ejecutar el script SQL local de forma asíncrona: " + ex.Message);
-                return null; // Maneja el error según sea necesario
-            }
-        }
-
-        public Dictionary<string, List<string>> ExtractTuples(string sqlScript)
-        {
-            var tableColumns = new Dictionary<string, List<string>>();
-
-            // Encuentra todas las definiciones de tablas en el script SQL
-            var tableMatches = Regex.Matches(sqlScript, @"CREATE TABLE ([^\(]+)\((.*?)\);", RegexOptions.IgnoreCase | RegexOptions.Singleline);
-
-            foreach (Match tableMatch in tableMatches)
-            {
-                string tableName = tableMatch.Groups[1].Value.Trim();
-                string columns = tableMatch.Groups[2].Value;
-
-                // Divide las columnas por comas y limpia los espacios en blanco
-                var columnList = new List<string>(
-                    columns.Split(',', StringSplitOptions.RemoveEmptyEntries)
-                    .Select(column => column.Trim())
-                );
-
-                // Agrega la tabla y sus columnas al diccionario
-                tableColumns[tableName] = columnList;
-            }
-
-            return tableColumns;
+            return new SqlConnection(_connectionString);
         }
 
 
-        public async Task<List<Dto.TableSqlDto>> ReadRemoteSqlEndpointAsync( SqlConnectionRepository _dbContext)
+        public async  Task<string> ReadRemoteSqlEndpointAsync(string stringConnection)
         {
             try
             {
-                // Construye la consulta SQL para obtener información de todas las tablas
                 string sqlQuery = @"
                 SELECT TABLE_SCHEMA, TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE'";
-
-                // Ejecuta la consulta utilizando SqlConnectionRepository
-                var result = await _dbContext.ExecuteQueryAsync(sqlQuery);
-                string jsonData = JsonConvert.SerializeObject(result);
+                var result = await this.GetTableNamesAsync(sqlQuery,stringConnection);
+                string SQLDataToJSON = await this.CreateJsonFromTablesAsync(result,stringConnection);
                 // Procesa los resultados para obtener la estructura de las tablas y sus columnas
-                List <TableSqlDto> tableInfos = new List<TableSqlDto>();
-                var currentTableInfo = new TableSqlDto();
-                string currentTableName = null;
+             
 
-                // Agrega la última tabla a la lista
-                if (currentTableName != null)
-                {
-                    tableInfos.Add(currentTableInfo);
-                }
+                return SQLDataToJSON;
 
-                return tableInfos;
             }
             catch (Exception ex)
             {
                 // Maneja las excepciones según tus necesidades
                 throw ex;
             }
+        }
+
+
+
+        public async Task<List<string>> GetTableNamesAsync(string sqlQuery, string connectionString)
+        {
+            List<string> tableNames = new List<string>();
+
+            try
+            {
+                using (SqlConnection connection = CreateSqlConnection(connectionString))
+                {
+                    await connection.OpenAsync();
+
+                    using (SqlCommand tableCommand = new SqlCommand(sqlQuery, connection))
+                    using (SqlDataReader tableReader = await tableCommand.ExecuteReaderAsync())
+                    {
+                        while (tableReader.Read()) // Para cada tabla
+                        {
+                            string tableNameWithSchema = $"{tableReader.GetString(0)}.{tableReader.GetString(1)}";
+                            tableNames.Add(tableNameWithSchema);
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                // Manejo de excepciones
+                Console.WriteLine($"Error al obtener nombres de tablas: {ex.Message}");
+                throw;
+            }
+
+            return tableNames;
+        }
+
+
+
+        public async Task<string> CreateJsonFromTablesAsync(List<string> tableNames, string connectionString)
+        {
+            // Crea y llena el JSON utilizando los nombres de las tablas
+            JObject json = new JObject();
+
+            try
+            {
+                using (SqlConnection connection = CreateSqlConnection(connectionString))
+                {
+                    await connection.OpenAsync();
+
+                    foreach (string tableNameWithSchema in tableNames)
+                    {
+                        // Analizar el esquema y el nombre de la tabla
+                        string[] parts = tableNameWithSchema.Split('.'); // Separar por el punto
+                        string schema = "dbo"; // Establecer un valor predeterminado en caso de que no haya un esquema específico
+                        string tableName = tableNameWithSchema; // El nombre de la tabla por defecto
+
+                        if (parts.Length > 1)
+                        {
+                            schema = parts[0]; // Tomar el primer elemento como esquema
+                            tableName = parts[1]; // Tomar el segundo elemento como nombre de la tabla
+                        }
+
+                        // Consulta para obtener todos los registros de la tabla actual con el esquema especificado
+                        string dataQuery = $"SELECT * FROM [{schema}].[{tableName}]";
+
+                        using (SqlCommand dataCommand = new SqlCommand(dataQuery, connection))
+                        using (SqlDataReader dataReader = await dataCommand.ExecuteReaderAsync())
+                        {
+                            JArray tableData = new JArray();
+
+                            while (dataReader.Read()) // Para cada registro en la tabla
+                            {
+                                JObject rowData = new JObject();
+
+                                for (int i = 0; i < dataReader.FieldCount; i++)
+                                {
+                                    string columnName = dataReader.GetName(i);
+                                    object columnValue = dataReader.GetValue(i);
+
+                                    rowData[columnName] = JToken.FromObject(columnValue);
+                                }
+
+                                tableData.Add(rowData);
+                            }
+
+                            json[tableName] = tableData;
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                // Manejo de excepciones
+                Console.WriteLine($"Error al crear JSON desde tablas: {ex.Message}");
+                throw;
+            }
+
+            JObject finalJson = new JObject();
+            finalJson["data"] = json;
+
+            return finalJson.ToString();
         }
 
 
