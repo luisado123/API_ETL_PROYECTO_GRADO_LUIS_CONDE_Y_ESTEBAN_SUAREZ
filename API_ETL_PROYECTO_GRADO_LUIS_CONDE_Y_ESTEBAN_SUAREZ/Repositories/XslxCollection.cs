@@ -5,7 +5,7 @@ namespace API_ETL_PROYECTO_GRADO_LUIS_CONDE_Y_ESTEBAN_SUAREZ.Repositories
 {
     public class XslxCollection : IXslxCollection
     {
-        public async Task<IEnumerable<Dictionary<string, string>>> ReadExcelAsync(string filePath)
+        public async Task<List<Dictionary<string, string>>> ReadExcelAsync(string filePath)
         {
             var excelDataList = new List<Dictionary<string, string>>();
 
@@ -39,6 +39,31 @@ namespace API_ETL_PROYECTO_GRADO_LUIS_CONDE_Y_ESTEBAN_SUAREZ.Repositories
             });
 
             return excelDataList;
+        }
+
+        public async Task<string> ExcelDataToMetadataJsonAsync(List<Dictionary<string, string>> excelData)
+        {
+            var metadata = new Metadata
+            {
+                data = new List<Dictionary<string, object>>()
+            };
+
+            foreach (var excelRow in excelData)
+            {
+                var rowData = new Dictionary<string, object>();
+
+                foreach (var kvp in excelRow)
+                {
+                    rowData[kvp.Key] = kvp.Value;
+                }
+
+                metadata.data.Add(rowData);
+            }
+
+            metadata.department = "nomina";
+
+            // Convierte Metadata a una cadena JSON y la envuelve en un Task<string>
+            return await Task.FromResult(Newtonsoft.Json.JsonConvert.SerializeObject(metadata));
         }
 
 

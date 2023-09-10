@@ -2,6 +2,7 @@
 {
     public interface IXslxCollection
     {
-        Task<IEnumerable<Dictionary<string, string>>> ReadExcelAsync(string filePath);
+        Task<List<Dictionary<string, string>>> ReadExcelAsync(string filePath);
+        Task<string> ExcelDataToMetadataJsonAsync(List<Dictionary<string, string>> excelData);
     }
 }

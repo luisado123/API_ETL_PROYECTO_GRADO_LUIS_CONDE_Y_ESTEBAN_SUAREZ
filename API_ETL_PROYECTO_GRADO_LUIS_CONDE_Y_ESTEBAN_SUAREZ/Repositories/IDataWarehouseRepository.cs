@@ -2,7 +2,7 @@
 {
     public interface IDataWarehouseRepository
     {
-        Task LoadRawDataIntoStagingArea(List<string> dataJson);
-        Task LoadSingleRawDataIntoStagingArea(string singleDataJson);
+        Task<bool> LoadRawDataIntoStagingArea(List<string> dataJson);
+        Task<bool> LoadSingleRawDataIntoStagingArea(string singleDataJson);
     }
 }

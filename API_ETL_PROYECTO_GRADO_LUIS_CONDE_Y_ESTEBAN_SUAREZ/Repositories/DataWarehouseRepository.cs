@@ -25,7 +25,7 @@ namespace API_ETL_PROYECTO_GRADO_LUIS_CONDE_Y_ESTEBAN_SUAREZ.Repositories
             }
         }
 
-        public async Task LoadRawDataIntoStagingArea(List<string> rawJsonDataList)
+        public async Task<bool> LoadRawDataIntoStagingArea(List<string> rawJsonDataList)
         {
             InitializeCollection(); // Inicializa la colección si aún no se ha hecho
 
@@ -33,26 +33,59 @@ namespace API_ETL_PROYECTO_GRADO_LUIS_CONDE_Y_ESTEBAN_SUAREZ.Repositories
 
             foreach (string json in rawJsonDataList)
             {
-                BsonDocument rawDataBson = BsonDocument.Parse(json);
-                bsonData.Add(rawDataBson);
+                try
+                {
+                    BsonDocument rawDataBson = BsonDocument.Parse(json);
+                    bsonData.Add(rawDataBson);
+                }
+                catch (Exception ex)
+                {
+                    // Puedes registrar el error si lo deseas
+                    Console.WriteLine($"Error al parsear el JSON: {ex.Message}");
+                    return false; // Retorna false en caso de error
+                }
             }
 
-            await Collection.InsertManyAsync(bsonData);
-        }
-
-        public async Task LoadSingleRawDataIntoStagingArea(string transformedDataJson)
-        {
-            InitializeCollection(); // Inicializa la colección si aún no se ha hecho
-
-            BsonDocument rawSingleDataBson = BsonDocument.Parse(transformedDataJson);
-
-            if (!rawSingleDataBson.Contains("_id"))
+            try
             {
-                rawSingleDataBson["_id"] = ObjectId.GenerateNewId();
+                await Collection.InsertManyAsync(bsonData);
+                return true; // Retorna true si se guardó con éxito
             }
-            // Implementa aquí la lógica para guardar el dato transformado
-            await Collection.InsertOneAsync(rawSingleDataBson);
+            catch (Exception ex)
+            {
+                // Puedes registrar el error si lo deseas
+                Console.WriteLine($"Error al guardar los datos: {ex.Message}");
+                return false; // Retorna false en caso de error
+            }
         }
+
+
+        public async Task<bool> LoadSingleRawDataIntoStagingArea(string transformedDataJson)
+        {
+            try
+            {
+                InitializeCollection(); // Inicializa la colección si aún no se ha hecho
+
+                BsonDocument rawSingleDataBson = BsonDocument.Parse(transformedDataJson);
+
+                if (!rawSingleDataBson.Contains("_id"))
+                {
+                    rawSingleDataBson["_id"] = ObjectId.GenerateNewId();
+                }
+
+                // Implementa aquí la lógica para guardar el dato transformado
+                await Collection.InsertOneAsync(rawSingleDataBson);
+
+                return true; // Indica que la operación fue exitosa
+            }
+            catch (Exception ex)
+            {
+                // Puedes registrar el error si lo deseas
+                Console.WriteLine($"Error al guardar el dato transformado: {ex.Message}");
+                return false; // Indica que la operación falló
+            }
+        }
+
     }
 
 }

@@ -7,6 +7,7 @@ using Microsoft.Data.Analysis;
 using MongoDB.Bson.IO;
 using System.Xml;
 using Newtonsoft.Json;
+using API_ETL_PROYECTO_GRADO_LUIS_CONDE_Y_ESTEBAN_SUAREZ.Dto;
 
 namespace API_ETL_PROYECTO_GRADO_LUIS_CONDE_Y_ESTEBAN_SUAREZ.Repositories
 {
@@ -37,6 +38,10 @@ namespace API_ETL_PROYECTO_GRADO_LUIS_CONDE_Y_ESTEBAN_SUAREZ.Repositories
 
         public  async Task<string> DataFrameToJsonAsync(DataFrame df)
         {
+            var Metadata = new Metadata
+            {
+                data = new List<Dictionary<string, object>>()
+            };
             var data = new List<Dictionary<string, object>>();
 
             for (int rowIndex = 0; rowIndex < df.Rows.Count(); rowIndex++)
@@ -52,17 +57,12 @@ namespace API_ETL_PROYECTO_GRADO_LUIS_CONDE_Y_ESTEBAN_SUAREZ.Repositories
                     rowData[columnName] = columnValue.ToString();
                 }
 
-                data.Add(rowData);
+                Metadata.data.Add(rowData);
             }
-
+            Metadata.department = "nomina";
    
-            var finalJsonRaw = new
-            {
-                data,
-                origin="CSV"
-            };
 
-            return await Task.FromResult(Newtonsoft.Json.JsonConvert.SerializeObject(finalJsonRaw));
+            return await Task.FromResult(Newtonsoft.Json.JsonConvert.SerializeObject(Metadata));
         }
 
     }
