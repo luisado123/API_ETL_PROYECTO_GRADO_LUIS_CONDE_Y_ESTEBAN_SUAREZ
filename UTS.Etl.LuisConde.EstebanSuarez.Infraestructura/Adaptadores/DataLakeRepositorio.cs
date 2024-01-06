@@ -1,9 +1,7 @@
-﻿using MongoDB.Bson;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Microsoft.AspNetCore.Mvc;
+using MongoDB.Bson;
+using UTS.Etl.LuisConde.EstebanSuarez.Dominio.Constantes;
+using UTS.Etl.LuisConde.EstebanSuarez.Dominio.Entidades;
 using UTS.Etl.LuisConde.EstebanSuarez.Dominio.Excepciones;
 using UTS.Etl.LuisConde.EstebanSuarez.Dominio.Puertos;
 
@@ -18,28 +16,47 @@ namespace UTS.Etl.LuisConde.EstebanSuarez.Infraestructura.Adaptadores
         {
             _mongoConexionRepositorio = mongoConexionRepositorio;
         }
-        public async Task<bool> GuardarUno(string objetoRawData)
+        public async Task<IActionResult> GuardarUno(string objetoRawData)
         {
             try
             {
-               var coleccion = _mongoConexionRepositorio.InicializarColeccion(NombreColeccion);
+                var coleccion = _mongoConexionRepositorio.InicializarColeccion(NombreColeccion);
                 BsonDocument rawSingleDataBson = BsonDocument.Parse(objetoRawData);
                 if (!rawSingleDataBson.Contains("_id"))
                 {
                     rawSingleDataBson["_id"] = ObjectId.GenerateNewId();
                 }
                 await coleccion.InsertOneAsync(rawSingleDataBson);
-                return true; // Indica que la operación fue exitosa
+                return new OkObjectResult(new { Message = MensajesExitosos.CargaEnDataWareHouseExitosa });
             }
             catch (Exception ex)
             {
-                throw new GuardadoEnDataLakeFallidoExcepcion($"Error al guardar el dato transformado: {ex.Message}");
+                throw new GuardadoEnDataLakeFallidoExcepcion($"{MensajesExcepciones.ErrorAlGuardar}: {ex.Message}");
             }
         }
 
-        public Task<bool> GuardarVarios(IEnumerable<string> listaRawData)
+        public async Task<IActionResult> GuardarVarios(List<string> listaObjetosRawData)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var coleccion = _mongoConexionRepositorio.InicializarColeccion(NombreColeccion);
+                var listadoRawDataFormatoBson = listaObjetosRawData.Select(objetoRawData => BsonDocument.Parse(objetoRawData)).ToList();
+             
+                foreach (var objetoFormatoBson in listadoRawDataFormatoBson)
+                {
+                    if (!objetoFormatoBson.Contains("_id"))
+                    {
+                        objetoFormatoBson["_id"] = ObjectId.GenerateNewId();
+                    }
+                }
+
+                await coleccion.InsertManyAsync(listadoRawDataFormatoBson);
+                return new OkObjectResult(new { Message = MensajesExitosos.CargaEnDataWareHouseExitosa });
+            }
+            catch (Exception ex)
+            {
+                throw new GuardadoEnDataLakeFallidoExcepcion($"{MensajesExcepciones.ErrorAlGuardar}: {ex.Message}");
+            }
         }
     }
 }

@@ -10,5 +10,6 @@ namespace UTS.Etl.LuisConde.EstebanSuarez.Dominio.Constantes
     {
         public const string ExtensionInvalida = "La extensión del archivo no es válida.";
         public const string DepartamentoRequerido = "El departamento es un campo requerido.";
+        public const string ErrorAlGuardar = "Ocurrio un error al intentar cargar el objeto en el DataWarehouse.";
     }
 }

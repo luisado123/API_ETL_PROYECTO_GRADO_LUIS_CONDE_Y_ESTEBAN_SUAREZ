@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Mvc;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,18 +10,24 @@ using UTS.Etl.LuisConde.EstebanSuarez.Dominio.Puertos;
 namespace UTS.Etl.LuisConde.EstebanSuarez.Dominio.servicios.ArchivoXlsx
 {
     [DominioService]
-    public  class GuardarObjetoEtlServicio
+    public class GuardarObjetoEtlServicio
     {
         private IDataLakeRepositorio _dataLakeRepositorio;
         public GuardarObjetoEtlServicio(IDataLakeRepositorio dataLakeRepositorio)
         {
             _dataLakeRepositorio = dataLakeRepositorio;
         }
-        public async Task<RespuestaEtl> GuardarRawDataAsync(ObjetoDataLake metadata)
+        public async Task<IActionResult> GuardarRawDataAsync(List<string> datos)
         {
-            var dataSerializada = metadata.ConvertirAJson();
-            await  _dataLakeRepositorio.GuardarUno(dataSerializada);
-            return metadata.CrearRespuestaEtl(metadata.DepartmentoOrigen, dataSerializada);
+            if (datos.Count == 1)
+            {
+                return await _dataLakeRepositorio.GuardarUno(datos.First());
+            }
+            else
+            {
+                return await _dataLakeRepositorio.GuardarVarios(datos);
+            }
         }
+
     }
 }

@@ -11,17 +11,22 @@ namespace UTS.Etl.LuisConde.EstebanSuarez.Dominio.Entidades
     {
         public string Id { get; set; } = default!;
         public List<Dictionary<string, object>> Datos { get; set; }
-        public string DepartmentoOrigen { get; set; }
+        public string DepartamentoOrigen { get; set; }
 
         public ObjetoDataLake(List<Dictionary<string, object>> datos, string departmento)
         {
             Datos = datos;
-            DepartmentoOrigen = departmento;
+            DepartamentoOrigen = departmento;
+        }
+
+        public ObjetoDataLake()
+        {
+            // Constructor sin parámetros requerido para la deserialización.
         }
 
         public void AsignarDepartamento(string departamento)
         {
-            DepartmentoOrigen = departamento;
+            DepartamentoOrigen = departamento;
         }
 
         public string ConvertirAJson()

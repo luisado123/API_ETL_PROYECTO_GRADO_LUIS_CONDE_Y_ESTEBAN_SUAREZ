@@ -12,50 +12,51 @@ using UTS.Etl.LuisConde.EstebanSuarez.Dominio.Puertos;
 using UTS.Etl.LuisConde.EstebanSuarez.Infraestructura.Adaptadores;
 using UTS.Etl.LuisConde.EstebanSuarez.Infraestructura.Adaptadores.MongoDb;
 using UTS.Etl.LuisConde.EstebanSuarez.Infraestructura.FormateoRespuesta;
+using UTS.Etl.LuisConde.EstebanSuarez.Aplicacion.Etl.Carga;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
+using MongoDB.Driver;
 
 ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-
+var configuracion = new ConfigurationBuilder()
+        .AddJsonFile("appsettings.json", optional: false)
+        .Build();
 builder.Services.AddControllers();
 builder.Services.AddSignalR();
 builder.Services.AddMediatR(typeof(Program));
 builder.Services.AddTransient<IProcesarArchivoServicio, ProcesarArchivoServicio>();
 builder.Services.AddTransient<IRequestHandler<CrearObjetoDataLakeComando, RespuestaEtl>, CrearObjetoDataLakeManejador>();
-//builder.Services.AddSingleton<IMongoConexionRepositorio>(provider =>
-//{
-//    var configuration = provider.GetRequiredService<IConfiguration>();
-//    return new MongoConexionRepositorio(
-//        configuration["MongoDb:ConnectionString"],
-//        configuration["MongoDb:DatabaseName"]
-//    );
-//});
+builder.Services.AddSingleton<IMongoClient>(_ =>
+{
+    var connectionString = configuracion.GetConnectionString("MongoDbConnection");
+    return new MongoClient(connectionString);
+});
 
-
-//builder.Services.AddTransient<GuardarObjetoEtlServicio>();
-//builder.Services.AddTransient<IDataLakeRepositorio, DataLakeRepositorio>();
-
-
+builder.Services.AddSingleton<IMongoConexionRepositorio, MongoConexionRepositorio>(_ =>
+{
+    var connectionString = configuracion.GetConnectionString("MongoDbConnection");
+    var databaseName = configuracion.GetConnectionString("MongoDbDatabaseName");
+    return new MongoConexionRepositorio(connectionString, databaseName);
+});
+builder.Services.AddSingleton<IDataLakeRepositorio, DataLakeRepositorio>();
+builder.Services.AddTransient<GuardarObjetoEtlServicio>();
+builder.Services.AddTransient<IRequestHandler<CargarObjetosDataLakeComando,IActionResult>, CargarObjetosDataLakeManejador>();
 
 
 var loggerFactory = LoggerFactory.Create(builder =>
 {
-    // 2. Configuración del LoggerFactory
     builder
         .AddConsole() // Agregar el destino de registro de consola
         .SetMinimumLevel(LogLevel.Information); // Establecer el nivel de registro deseado
 });
 
-// 3. Creación del Logger
 var logger = loggerFactory.CreateLogger<DataWarehouseHubClass>();
 
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-//builder.Services.AddScoped<IUnitOfWork ,UnitOfWork>();
-
-//builder.Services.AddSingleton<MongoConnectionRepository>();
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowLocalhost", builder =>
