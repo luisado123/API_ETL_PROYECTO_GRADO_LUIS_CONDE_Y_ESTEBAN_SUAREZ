@@ -22,7 +22,7 @@ namespace UTS.Etl.LuisConde.EstebanSuarez.Infraestructura.Extensiones
 
             return contenido;
         }
-        public static async Task<List<Dictionary<string, object>>> ProcesarArchivoExcelAsync(SpreadsheetDocument spreadsheetDocument)
+        private static async Task<List<Dictionary<string, object>>> ProcesarArchivoExcelAsync(SpreadsheetDocument spreadsheetDocument)
         {
             return await Task.Run(() =>
             {

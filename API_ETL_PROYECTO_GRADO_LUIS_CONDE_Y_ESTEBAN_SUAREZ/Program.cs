@@ -11,6 +11,7 @@ using UTS.Etl.LuisConde.EstebanSuarez.Dominio.servicios.ArchivoXlsx;
 using UTS.Etl.LuisConde.EstebanSuarez.Dominio.Puertos;
 using UTS.Etl.LuisConde.EstebanSuarez.Infraestructura.Adaptadores;
 using UTS.Etl.LuisConde.EstebanSuarez.Infraestructura.Adaptadores.MongoDb;
+using UTS.Etl.LuisConde.EstebanSuarez.Infraestructura.FormateoRespuesta;
 
 ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
 var builder = WebApplication.CreateBuilder(args);
@@ -72,6 +73,7 @@ var app = builder.Build();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
+    app.UseMiddleware<ExceptionMiddleware>();
     app.UseSwagger();
     app.UseSwaggerUI();
 }
