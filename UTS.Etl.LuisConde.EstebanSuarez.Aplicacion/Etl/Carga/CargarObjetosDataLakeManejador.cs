@@ -18,7 +18,7 @@ namespace UTS.Etl.LuisConde.EstebanSuarez.Aplicacion.Etl.Carga
         }
         public async Task<IActionResult> Handle(CargarObjetosDataLakeComando request, CancellationToken cancellationToken)
         {
-            return await _guardarObjetoEtlServicio.GuardarRawDataAsync(request.ListaJsons!);
+            return await _guardarObjetoEtlServicio.GuardarRawDataAsync(request.objetoDataLake);
         }
     }
 }

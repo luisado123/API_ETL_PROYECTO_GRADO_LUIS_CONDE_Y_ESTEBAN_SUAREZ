@@ -13,7 +13,7 @@ namespace UTS.Etl.LuisConde.EstebanSuarez.Aplicacion.Etl.Carga
     public record CargarObjetosDataLakeComando : IRequest<IActionResult>
     {
         [FromBody, Required]
-        public List<string>? ListaJsons { get; init; }
+        public ObjetoDataLake? objetoDataLake { get; init; }
 
     }
 

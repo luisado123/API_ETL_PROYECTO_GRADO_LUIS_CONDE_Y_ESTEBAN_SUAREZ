@@ -9,7 +9,6 @@ namespace UTS.Etl.LuisConde.EstebanSuarez.Dominio.Entidades
 {
     public class ObjetoDataLake
     {
-        public string Id { get; set; } = default!;
         public List<Dictionary<string, object>> Datos { get; set; }
         public string DepartamentoOrigen { get; set; }
 

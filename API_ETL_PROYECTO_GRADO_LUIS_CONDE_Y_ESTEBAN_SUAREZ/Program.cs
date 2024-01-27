@@ -54,19 +54,20 @@ var loggerFactory = LoggerFactory.Create(builder =>
 });
 
 var logger = loggerFactory.CreateLogger<DataWarehouseHubClass>();
+string CORSOpenPolicy = "OpenCorsPolicy";
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowLocalhost", builder =>
-    {
-        builder.WithOrigins("https://localhost:7229") // Cambia el puerto si es necesario
-               .AllowAnyHeader()
-               .AllowAnyMethod()
-               .AllowCredentials();
-    });
+    options.AddPolicy(
+        name: CORSOpenPolicy,
+        builder =>
+        {
+            builder.WithOrigins("*").AllowAnyHeader().AllowAnyMethod();
+        });
 });
+
 
 
 var app = builder.Build();
@@ -78,7 +79,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-app.UseCors("AllowLocalhost");
+app.UseCors(CORSOpenPolicy);
 app.UseHttpsRedirection();
 app.UseRouting();
 app.UseAuthorization();

@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using MongoDB.Bson;
 using UTS.Etl.LuisConde.EstebanSuarez.Dominio.Constantes;
-using UTS.Etl.LuisConde.EstebanSuarez.Dominio.Entidades;
 using UTS.Etl.LuisConde.EstebanSuarez.Dominio.Excepciones;
 using UTS.Etl.LuisConde.EstebanSuarez.Dominio.Puertos;
 

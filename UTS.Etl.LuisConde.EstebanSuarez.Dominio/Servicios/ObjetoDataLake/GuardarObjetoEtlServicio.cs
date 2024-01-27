@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,16 +18,21 @@ namespace UTS.Etl.LuisConde.EstebanSuarez.Dominio.servicios.ArchivoXlsx
         {
             _dataLakeRepositorio = dataLakeRepositorio;
         }
-        public async Task<IActionResult> GuardarRawDataAsync(List<string> datos)
+        public async Task<IActionResult> GuardarRawDataAsync(ObjetoDataLake objetoDataLake)
         {
-            if (datos.Count == 1)
+            var serializerSettings = new JsonSerializerSettings
             {
-                return await _dataLakeRepositorio.GuardarUno(datos.First());
-            }
-            else
-            {
-                return await _dataLakeRepositorio.GuardarVarios(datos);
-            }
+                Converters = { new Newtonsoft.Json.Converters.StringEnumConverter() }, // Esto es opcional y solo si necesitas serializar enumeraciones como cadenas
+                DefaultValueHandling = DefaultValueHandling.IgnoreAndPopulate, // Ignorar valores predeterminados
+                NullValueHandling = NullValueHandling.Ignore // Ignorar valores nulos
+            };
+
+            string objetoDataLakeJson = System.Text.Json.JsonSerializer.Serialize(objetoDataLake);
+            // Utiliza objetoDataLakeJson como parámetro donde sea necesario.
+
+            return await _dataLakeRepositorio.GuardarUno(objetoDataLakeJson);
+
+          
         }
 
     }
