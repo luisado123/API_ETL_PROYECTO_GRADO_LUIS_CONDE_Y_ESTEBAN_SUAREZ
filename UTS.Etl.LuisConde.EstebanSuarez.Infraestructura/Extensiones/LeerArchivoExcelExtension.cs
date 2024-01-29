@@ -7,6 +7,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using UTS.Etl.LuisConde.EstebanSuarez.Dominio.Constantes;
+using UTS.Etl.LuisConde.EstebanSuarez.Dominio.Excepciones;
 using UTS.Etl.LuisConde.EstebanSuarez.Infraestructura.Servicios;
 
 namespace UTS.Etl.LuisConde.EstebanSuarez.Infraestructura.Extensiones
@@ -17,9 +19,9 @@ namespace UTS.Etl.LuisConde.EstebanSuarez.Infraestructura.Extensiones
         {
             using var archivoStream = archivo.OpenReadStream();
             using var documento = SpreadsheetDocument.Open(archivoStream, false);
-
+            if (ValidarArchivoVacio(ObtenerFilasExcel(documento)!))
+                throw new ArchivoVacioExcepcion(MensajesExcepciones.ArchivoVacio);
             var contenido = await ProcesarArchivoExcelAsync(documento);
-
             return contenido;
         }
         private static async Task<List<Dictionary<string, object>>> ProcesarArchivoExcelAsync(SpreadsheetDocument spreadsheetDocument)
@@ -58,7 +60,7 @@ namespace UTS.Etl.LuisConde.EstebanSuarez.Infraestructura.Extensiones
             });
         }
 
-
+        private static bool ValidarArchivoVacio(IEnumerable<Row> filas)=>!filas.Any();
 
         private static  string ObtenerCeldasExcel(WorkbookPart workbookPart, Cell cell)
         {
@@ -73,6 +75,26 @@ namespace UTS.Etl.LuisConde.EstebanSuarez.Infraestructura.Extensiones
 
             return text;
         }
+
+        private static IEnumerable<Row>? ObtenerFilasExcel(SpreadsheetDocument documento)
+        {
+            var hojaValida = documento.WorkbookPart.Workbook.Sheets.Elements<Sheet>().FirstOrDefault();
+
+            if (hojaValida == null)
+            {
+                return null;
+            }
+
+            string idRelacion = hojaValida.Id.Value;
+            WorksheetPart parteHojaTrabajo = (WorksheetPart)documento.WorkbookPart.GetPartById(idRelacion);
+            Worksheet hojaTrabajo = parteHojaTrabajo.Worksheet;
+            SheetData datosHoja = hojaTrabajo.GetFirstChild<SheetData>();
+
+            IEnumerable<Row> filas = datosHoja.Descendants<Row>().Where(fila => !string.IsNullOrEmpty(fila.InnerText));
+
+            return filas;
+        }
+
 
     }
 }

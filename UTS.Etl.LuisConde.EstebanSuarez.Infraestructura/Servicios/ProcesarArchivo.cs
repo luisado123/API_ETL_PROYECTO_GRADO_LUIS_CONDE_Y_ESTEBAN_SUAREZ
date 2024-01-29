@@ -27,6 +27,7 @@ namespace UTS.Etl.LuisConde.EstebanSuarez.Infraestructura.Servicios
                 ".csv" => await ProcesarArchivoPlano(archivo),
                 _ => throw new ExtensionArchivoNoValidaException(MensajesExcepciones.ExtensionInvalida)
             };
+
             return elementosArchivo;
         }
 

@@ -9,5 +9,7 @@ namespace UTS.Etl.LuisConde.EstebanSuarez.Dominio.Puertos
         Task<IActionResult> GuardarVarios(List<string> listadoRawData);
         Task<IActionResult> GuardarUno(string objetoRawData);
 
+        Task<List<RespuestaConsultaPorDepartamento>> ObtenerPorCampo(string objetoRawData);
+
     }
 }

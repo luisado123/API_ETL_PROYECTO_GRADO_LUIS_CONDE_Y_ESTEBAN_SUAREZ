@@ -1,11 +1,13 @@
 ﻿using API_ETL_PROYECTO_GRADO_LUIS_CONDE_Y_ESTEBAN_SUAREZ.Dto;
 using API_ETL_PROYECTO_GRADO_LUIS_CONDE_Y_ESTEBAN_SUAREZ.Utils.HubSignalR;
+using DocumentFormat.OpenXml.Office2010.ExcelAc;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Data.Analysis;
 using UTS.Etl.LuisConde.EstebanSuarez.Aplicacion.Etl.ArchivoXlsx.Comandos.Crear;
 using UTS.Etl.LuisConde.EstebanSuarez.Aplicacion.Etl.Carga;
+using UTS.Etl.LuisConde.EstebanSuarez.Aplicacion.Etl.Obtencion;
 using UTS.Etl.LuisConde.EstebanSuarez.Dominio.Entidades;
 
 namespace API_ETL_PROYECTO_GRADO_LUIS_CONDE_Y_ESTEBAN_SUAREZ.Controllers
@@ -35,6 +37,10 @@ namespace API_ETL_PROYECTO_GRADO_LUIS_CONDE_Y_ESTEBAN_SUAREZ.Controllers
         {
             return Ok("Hola");
         }
+
+        [HttpGet("ObtenerDataPorDepartamento")]
+        public async Task<List<RespuestaConsultaPorDepartamento>> ObtenerDataPorDepartamento([FromQuery] ObtenerDatosDepartamentoPorIdDepartamentoComando solicitud)=> await _mediator.Send(solicitud);
+
 
 
     }

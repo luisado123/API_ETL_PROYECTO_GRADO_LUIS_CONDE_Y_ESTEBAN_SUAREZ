@@ -1,6 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using MongoDB.Bson;
+using MongoDB.Bson.Serialization;
+using MongoDB.Driver;
 using UTS.Etl.LuisConde.EstebanSuarez.Dominio.Constantes;
+using UTS.Etl.LuisConde.EstebanSuarez.Dominio.Entidades;
 using UTS.Etl.LuisConde.EstebanSuarez.Dominio.Excepciones;
 using UTS.Etl.LuisConde.EstebanSuarez.Dominio.Puertos;
 
@@ -56,6 +59,33 @@ namespace UTS.Etl.LuisConde.EstebanSuarez.Infraestructura.Adaptadores
             {
                 throw new GuardadoEnDataLakeFallidoExcepcion($"{MensajesExcepciones.ErrorAlGuardar}: {ex.Message}");
             }
+        }
+
+        public async Task<List<RespuestaConsultaPorDepartamento>>  ObtenerPorCampo([FromQuery] string valorDepartamento)
+        {
+            try
+            {
+                var coleccion = _mongoConexionRepositorio.InicializarColeccion(NombreColeccion);
+
+                var builder = Builders<BsonDocument>.Filter;
+                var filtro = builder.Eq("DepartamentoOrigen", valorDepartamento);
+
+                var resultados = await coleccion.FindAsync(filtro);
+                var listaResultados = await resultados.ToListAsync();
+                var listaRespuestas = listaResultados.Select(doc =>
+                    BsonSerializer.Deserialize<RespuestaConsultaPorDepartamento>(doc.ToJson())
+                ).ToList();
+
+                if(!listaRespuestas.Any())
+                 throw new ObtensionPorDepartamentoException(MensajesExcepciones.NoHayRegistros);
+
+                return listaRespuestas;
+            }
+            catch (Exception ex)
+            {
+                throw new ObtensionPorDepartamentoException(ex.Message);
+            }
+
         }
     }
 }

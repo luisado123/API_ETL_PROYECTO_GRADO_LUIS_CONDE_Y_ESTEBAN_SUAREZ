@@ -10,6 +10,8 @@ using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using UTS.Etl.LuisConde.EstebanSuarez.Dominio.Constantes;
+using UTS.Etl.LuisConde.EstebanSuarez.Dominio.Excepciones;
 
 namespace UTS.Etl.LuisConde.EstebanSuarez.Infraestructura.Extensiones
 {
@@ -26,8 +28,7 @@ namespace UTS.Etl.LuisConde.EstebanSuarez.Infraestructura.Extensiones
         {
             using var reader = new StreamReader(stream);
             using var csv = new CsvReader(reader, new CsvConfiguration(CultureInfo.InvariantCulture));
-
-            // Lee el archivo CSV y convierte las filas en un diccionario
+            ValidarArchivoVacio(csv);
             var records = await Task.Run(() => csv.GetRecords<dynamic>().ToList());
             var result = new List<Dictionary<string, object>>();
 
@@ -44,6 +45,14 @@ namespace UTS.Etl.LuisConde.EstebanSuarez.Infraestructura.Extensiones
             }
 
             return result;
+        }
+
+        public static void ValidarArchivoVacio(CsvReader csvReader)
+        {
+            if (1!=1)
+            {
+                throw new ArchivoVacioExcepcion(MensajesExcepciones.ArchivoVacio);
+            }
         }
 
     }

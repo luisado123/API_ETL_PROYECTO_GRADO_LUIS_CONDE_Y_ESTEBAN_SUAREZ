@@ -16,6 +16,8 @@ using UTS.Etl.LuisConde.EstebanSuarez.Aplicacion.Etl.Carga;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using MongoDB.Driver;
+using UTS.Etl.LuisConde.EstebanSuarez.Aplicacion.Etl.Obtencion;
+using UTS.Etl.LuisConde.EstebanSuarez.Dominio.Servicios.ObjetoDataLake;
 
 ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
 var builder = WebApplication.CreateBuilder(args);
@@ -29,6 +31,8 @@ builder.Services.AddSignalR();
 builder.Services.AddMediatR(typeof(Program));
 builder.Services.AddTransient<IProcesarArchivoServicio, ProcesarArchivoServicio>();
 builder.Services.AddTransient<IRequestHandler<CrearObjetoDataLakeComando, RespuestaEtl>, CrearObjetoDataLakeManejador>();
+builder.Services.AddTransient<IRequestHandler<ObtenerDatosDepartamentoPorIdDepartamentoComando,List<RespuestaConsultaPorDepartamento>>,ObtenerDatosDepartamentoPorIdDepartamentoManejador>();
+
 builder.Services.AddSingleton<IMongoClient>(_ =>
 {
     var connectionString = configuracion.GetConnectionString("MongoDbConnection");
@@ -43,6 +47,8 @@ builder.Services.AddSingleton<IMongoConexionRepositorio, MongoConexionRepositori
 });
 builder.Services.AddSingleton<IDataLakeRepositorio, DataLakeRepositorio>();
 builder.Services.AddTransient<GuardarObjetoEtlServicio>();
+builder.Services.AddTransient<ObtenerDatosPorDepartamentoServicio>();
+
 builder.Services.AddTransient<IRequestHandler<CargarObjetosDataLakeComando,IActionResult>, CargarObjetosDataLakeManejador>();
 
 
