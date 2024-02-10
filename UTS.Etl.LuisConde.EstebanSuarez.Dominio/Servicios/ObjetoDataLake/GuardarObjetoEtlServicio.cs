@@ -20,19 +20,8 @@ namespace UTS.Etl.LuisConde.EstebanSuarez.Dominio.servicios.ArchivoXlsx
         }
         public async Task<IActionResult> GuardarRawDataAsync(ObjetoDataLake objetoDataLake)
         {
-            var serializerSettings = new JsonSerializerSettings
-            {
-                Converters = { new Newtonsoft.Json.Converters.StringEnumConverter() }, // Esto es opcional y solo si necesitas serializar enumeraciones como cadenas
-                DefaultValueHandling = DefaultValueHandling.IgnoreAndPopulate, // Ignorar valores predeterminados
-                NullValueHandling = NullValueHandling.Ignore // Ignorar valores nulos
-            };
-
             string objetoDataLakeJson = System.Text.Json.JsonSerializer.Serialize(objetoDataLake);
-            // Utiliza objetoDataLakeJson como parámetro donde sea necesario.
-
-            return await _dataLakeRepositorio.GuardarUno(objetoDataLakeJson);
-
-          
+            return await _dataLakeRepositorio.GuardarUno(objetoDataLakeJson);        
         }
 
     }

@@ -18,6 +18,7 @@ using Microsoft.Extensions.Configuration;
 using MongoDB.Driver;
 using UTS.Etl.LuisConde.EstebanSuarez.Aplicacion.Etl.Obtencion;
 using UTS.Etl.LuisConde.EstebanSuarez.Dominio.Servicios.ObjetoDataLake;
+using UTS.Etl.LuisConde.EstebanSuarez.Dominio.Servicios.ObjetoFinalDataSet;
 
 ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
 var builder = WebApplication.CreateBuilder(args);
@@ -31,6 +32,7 @@ builder.Services.AddSignalR();
 builder.Services.AddMediatR(typeof(Program));
 builder.Services.AddTransient<IProcesarArchivoServicio, ProcesarArchivoServicio>();
 builder.Services.AddTransient<IRequestHandler<CrearObjetoDataLakeComando, RespuestaEtl>, CrearObjetoDataLakeManejador>();
+builder.Services.AddTransient<IRequestHandler<ObtenerDataSetPorIdDepartamentoComando, RespuestaConsultaPorDepartamento>, ObtenerDataSetPorIdDepartamentoManejador>();
 builder.Services.AddTransient<IRequestHandler<ObtenerDatosDepartamentoPorIdDepartamentoComando,List<RespuestaConsultaPorDepartamento>>,ObtenerDatosDepartamentoPorIdDepartamentoManejador>();
 
 builder.Services.AddSingleton<IMongoClient>(_ =>
@@ -46,10 +48,17 @@ builder.Services.AddSingleton<IMongoConexionRepositorio, MongoConexionRepositori
     return new MongoConexionRepositorio(connectionString, databaseName);
 });
 builder.Services.AddSingleton<IDataLakeRepositorio, DataLakeRepositorio>();
+builder.Services.AddSingleton<IDataSetDataFinalRepositorio, DataSetDataFinalRepositorio>();
+
 builder.Services.AddTransient<GuardarObjetoEtlServicio>();
+builder.Services.AddTransient<GuardarOActualizarObjetoDataSetServicio>();
 builder.Services.AddTransient<ObtenerDatosPorDepartamentoServicio>();
+builder.Services.AddTransient<ObtenerDataSetPorIdDepartamentoServicio>();
+
 
 builder.Services.AddTransient<IRequestHandler<CargarObjetosDataLakeComando,IActionResult>, CargarObjetosDataLakeManejador>();
+builder.Services.AddTransient<IRequestHandler<CargarObjetoDataSetComando, IActionResult>, CargarObjetoDataSetManejador>();
+
 
 
 var loggerFactory = LoggerFactory.Create(builder =>

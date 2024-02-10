@@ -13,5 +13,6 @@ namespace UTS.Etl.LuisConde.EstebanSuarez.Dominio.Constantes
         public const string DepartamentoRequerido = "El departamento es un campo requerido.";
         public const string ErrorAlGuardar = "Ocurrio un error al intentar cargar el objeto en el DataWarehouse.";
         public const string NoHayRegistros = "No hay datos registrados para el departamento consultado";
+        public const string ErrorAlActualizar = "Hubo un error al actualizar El Data Set";
     }
 }

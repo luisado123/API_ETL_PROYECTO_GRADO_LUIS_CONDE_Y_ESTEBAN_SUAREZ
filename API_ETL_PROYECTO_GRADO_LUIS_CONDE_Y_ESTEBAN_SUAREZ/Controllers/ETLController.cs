@@ -32,14 +32,15 @@ namespace API_ETL_PROYECTO_GRADO_LUIS_CONDE_Y_ESTEBAN_SUAREZ.Controllers
         public async Task<IActionResult> GuardarObjetosEtl([FromForm] CargarObjetosDataLakeComando solicitud) => await _mediator.Send(solicitud);
 
 
-        [HttpGet("Hola")]
-        public IActionResult ObtenerSaludo()
-        {
-            return Ok("Hola");
-        }
+        [HttpPost("CargarDataCombinadaAlDataSet")]
+        public async Task<IActionResult> GuardarOActualizarDataSet([FromForm] CargarObjetoDataSetComando solicitud) => await _mediator.Send(solicitud);
 
-        [HttpGet("ObtenerDataPorDepartamento")]
+
+        [HttpGet("ObtenerDataLakesPorDepartamento")]
         public async Task<List<RespuestaConsultaPorDepartamento>> ObtenerDataPorDepartamento([FromQuery] ObtenerDatosDepartamentoPorIdDepartamentoComando solicitud)=> await _mediator.Send(solicitud);
+
+        [HttpGet("ObtenerDataFinalDataSetPorDepartamento")]
+        public async Task<RespuestaConsultaPorDepartamento> ObtenerDataFinalDataSetPorDepartamento([FromQuery] ObtenerDataSetPorIdDepartamentoComando solicitud) => await _mediator.Send(solicitud);
 
 
 
