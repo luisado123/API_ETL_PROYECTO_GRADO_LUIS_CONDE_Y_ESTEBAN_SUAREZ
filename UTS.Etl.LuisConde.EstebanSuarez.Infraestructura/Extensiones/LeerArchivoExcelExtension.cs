@@ -49,7 +49,15 @@ namespace UTS.Etl.LuisConde.EstebanSuarez.Infraestructura.Extensiones
                             var columnHeaderCell = sheetData.Elements<Row>().First().Elements<Cell>().ElementAt(col);
                             var columnHeader = ObtenerCeldasExcel(workbookPart, columnHeaderCell);
                             var cellValue = ObtenerCeldasExcel(workbookPart, cells[col]);
-                            excelData.Add(columnHeader, cellValue);
+                            try
+                            {
+                                excelData.Add(columnHeader, cellValue);
+
+                            }
+                            catch (Exception ex)
+                            {
+                                throw new ColumnasRepetidasException(MensajesExcepciones.ColumnaRepetida);
+                            }
                         }
 
                         excelDataList.Add(excelData);
