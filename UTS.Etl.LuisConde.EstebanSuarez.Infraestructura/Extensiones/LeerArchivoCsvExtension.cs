@@ -29,22 +29,31 @@ namespace UTS.Etl.LuisConde.EstebanSuarez.Infraestructura.Extensiones
             using var reader = new StreamReader(stream);
             using var csv = new CsvReader(reader, new CsvConfiguration(CultureInfo.InvariantCulture));
             ValidarArchivoVacio(csv);
-            var records = await Task.Run(() => csv.GetRecords<dynamic>().ToList());
-            var result = new List<Dictionary<string, object>>();
-
-            foreach (var record in records)
+            try
             {
-                var dictionary = new Dictionary<string, object>();
+                var records = await Task.Run(() => csv.GetRecords<dynamic>().ToList());
+                var result = new List<Dictionary<string, object>>();
 
-                foreach (var keyValuePair in record)
+                foreach (var record in records)
                 {
-                    dictionary.Add(keyValuePair.Key, keyValuePair.Value);
+                    var dictionary = new Dictionary<string, object>();
+
+                    foreach (var keyValuePair in record)
+                    {
+                        dictionary.Add(keyValuePair.Key, keyValuePair.Value);
+                    }
+
+                    result.Add(dictionary);
                 }
 
-                result.Add(dictionary);
+                return result;
             }
+            catch (Exception ex)
+            {
+                throw new ColumnasRepetidasException(MensajesExcepciones.ColumnaRepetida);
 
-            return result;
+            }
+      
         }
 
         public static void ValidarArchivoVacio(CsvReader csvReader)
