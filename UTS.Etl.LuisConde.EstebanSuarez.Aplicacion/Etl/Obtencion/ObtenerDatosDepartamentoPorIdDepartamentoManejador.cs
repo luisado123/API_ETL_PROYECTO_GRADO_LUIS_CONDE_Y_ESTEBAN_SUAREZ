@@ -12,14 +12,14 @@ using UTS.Etl.LuisConde.EstebanSuarez.Dominio.Servicios.ObjetoDataLake;
 
 namespace UTS.Etl.LuisConde.EstebanSuarez.Aplicacion.Etl.Obtencion
 {
-    public class ObtenerDatosDepartamentoPorIdDepartamentoManejador : IRequestHandler<ObtenerDatosDepartamentoPorIdDepartamentoComando, List<RespuestaConsultaPorDepartamento>>
+    public class ObtenerDatosDepartamentoPorIdDepartamentoManejador : IRequestHandler<ObtenerDatosDepartamentoPorIdDepartamentoConsulta, List<RespuestaConsultaPorDepartamento>>
     {
         private ObtenerDatosPorDepartamentoServicio _obtenerDatosPorDepartamentoServicio;
         public ObtenerDatosDepartamentoPorIdDepartamentoManejador(ObtenerDatosPorDepartamentoServicio obtenerDatosPorDepartamentoServicio)
         {
             _obtenerDatosPorDepartamentoServicio = obtenerDatosPorDepartamentoServicio;
         }
-        public async Task<List<RespuestaConsultaPorDepartamento>> Handle(ObtenerDatosDepartamentoPorIdDepartamentoComando request, CancellationToken cancellationToken)
+        public async Task<List<RespuestaConsultaPorDepartamento>> Handle(ObtenerDatosDepartamentoPorIdDepartamentoConsulta request, CancellationToken cancellationToken)
         {
             return await _obtenerDatosPorDepartamentoServicio.ObtenerPorDepartamentoAsync(request.codigoDepartamento);
         }

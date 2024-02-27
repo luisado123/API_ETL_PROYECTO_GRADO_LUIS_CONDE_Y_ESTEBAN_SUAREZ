@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -9,8 +10,9 @@ using UTS.Etl.LuisConde.EstebanSuarez.Dominio.Entidades;
 
 namespace UTS.Etl.LuisConde.EstebanSuarez.Aplicacion.Etl.Obtencion
 {
-    public record ObtenerDataSetPorIdDepartamentoComando(
-    [Required] string codigoDepartamento
-) : IRequest<RespuestaConsultaPorDepartamento>;
+    public record ObtenerDatosDepartamentoPorIdDepartamentoConsulta(
+       [Required] string codigoDepartamento
+   ) : IRequest<List<RespuestaConsultaPorDepartamento>>;
+
 
 }

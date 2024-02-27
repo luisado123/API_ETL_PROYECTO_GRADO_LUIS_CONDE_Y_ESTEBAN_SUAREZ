@@ -14,11 +14,10 @@ namespace UTS.Etl.LuisConde.EstebanSuarez.Aplicacion.Etl.ArchivoXlsx.Comandos.Cr
     public class CrearObjetoDataLakeManejador : IRequestHandler<CrearObjetoDataLakeComando, RespuestaEtl>
     {
         private IProcesarArchivoServicio _procesarArchivoServicio;
-        //private GuardarObjetoEtlServicio _guardarObjetoEtlServicio;
-        public CrearObjetoDataLakeManejador(IProcesarArchivoServicio procesarArchivoServicio/*, GuardarObjetoEtlServicio guardarObjetoEtlServicio*/)
+
+        public CrearObjetoDataLakeManejador(IProcesarArchivoServicio procesarArchivoServicio)
         {
             _procesarArchivoServicio = procesarArchivoServicio;
-            //_guardarObjetoEtlServicio = guardarObjetoEtlServicio;
         }
 
         public async Task<RespuestaEtl> Handle(CrearObjetoDataLakeComando request, CancellationToken cancellationToken)
@@ -27,7 +26,6 @@ namespace UTS.Etl.LuisConde.EstebanSuarez.Aplicacion.Etl.ArchivoXlsx.Comandos.Cr
             var metadata = new ObjetoDataLake(datosExcel, request.Departamento);
             var objetoSerializado = metadata.ConvertirAJson();
             return metadata.CrearRespuestaEtl(metadata.DepartamentoOrigen, objetoSerializado);
-            //return await _guardarObjetoEtlServicio.GuardarRawDataAsync(metadata);
         }
     }
 }

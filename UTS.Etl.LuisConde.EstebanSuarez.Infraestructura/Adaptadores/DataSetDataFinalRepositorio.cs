@@ -67,7 +67,7 @@ namespace UTS.Etl.LuisConde.EstebanSuarez.Infraestructura.Adaptadores
             }
         }
 
-        public async Task<RespuestaConsultaPorDepartamento> ObtenerPorDepartamento(string nombreDepartamento)
+        public async Task<RespuestaConsultaPorDepartamento?> ObtenerPorDepartamento(string nombreDepartamento)
         {
             try
             {
@@ -79,7 +79,7 @@ namespace UTS.Etl.LuisConde.EstebanSuarez.Infraestructura.Adaptadores
                 var resultado = await coleccion.Find(filtro).FirstOrDefaultAsync();
 
                 if (resultado == null)
-                    throw new ObtensionPorDepartamentoException(MensajesExcepciones.NoHayRegistros);
+                    return null;
 
                 return BsonSerializer.Deserialize<RespuestaConsultaPorDepartamento>(resultado.ToJson());
             }

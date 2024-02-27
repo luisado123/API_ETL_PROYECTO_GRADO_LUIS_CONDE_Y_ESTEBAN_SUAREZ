@@ -24,7 +24,7 @@ namespace UTS.Etl.LuisConde.EstebanSuarez.Dominio.Servicios.ObjetoFinalDataSet
         public async Task<IActionResult> GuardarOActualizarDataSetAsync(Entidades.ObjetoDataLake objetoDataSet)
         {
             var datosExistentes = await _dataSetDataFinalRepositorio.ObtenerPorDepartamento(objetoDataSet.DepartamentoOrigen);
-            string objetoDataSetJson = objetoDataSet.ConvertirAJson();
+            string objetoDataSetJson = System.Text.Json.JsonSerializer.Serialize(objetoDataSet);
             if (datosExistentes == null)
             {
              return  await _dataSetDataFinalRepositorio.GuardarUno(objetoDataSetJson);

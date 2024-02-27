@@ -19,9 +19,21 @@ using MongoDB.Driver;
 using UTS.Etl.LuisConde.EstebanSuarez.Aplicacion.Etl.Obtencion;
 using UTS.Etl.LuisConde.EstebanSuarez.Dominio.Servicios.ObjetoDataLake;
 using UTS.Etl.LuisConde.EstebanSuarez.Dominio.Servicios.ObjetoFinalDataSet;
+using Microsoft.AspNetCore.Http.Features;
 
 ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
 var builder = WebApplication.CreateBuilder(args);
+builder.WebHost.UseKestrel(options =>
+{
+    options.Limits.MaxRequestBodySize = int.MaxValue;
+});
+
+builder.Services.Configure<FormOptions>(options =>
+{
+    options.ValueLengthLimit = int.MaxValue;
+    options.MultipartBodyLengthLimit = int.MaxValue; // if don't set default value is: 128 MB
+    options.MultipartHeadersLengthLimit = int.MaxValue;
+});
 
 // Add services to the container.
 var configuracion = new ConfigurationBuilder()
@@ -32,14 +44,15 @@ builder.Services.AddSignalR();
 builder.Services.AddMediatR(typeof(Program));
 builder.Services.AddTransient<IProcesarArchivoServicio, ProcesarArchivoServicio>();
 builder.Services.AddTransient<IRequestHandler<CrearObjetoDataLakeComando, RespuestaEtl>, CrearObjetoDataLakeManejador>();
-builder.Services.AddTransient<IRequestHandler<ObtenerDataSetPorIdDepartamentoComando, RespuestaConsultaPorDepartamento>, ObtenerDataSetPorIdDepartamentoManejador>();
-builder.Services.AddTransient<IRequestHandler<ObtenerDatosDepartamentoPorIdDepartamentoComando,List<RespuestaConsultaPorDepartamento>>,ObtenerDatosDepartamentoPorIdDepartamentoManejador>();
+builder.Services.AddTransient<IRequestHandler<ObtenerDataSetPorIdDepartamentoConsulta, RespuestaConsultaPorDepartamento>, ObtenerDataSetPorIdDepartamentoManejador>();
+builder.Services.AddTransient<IRequestHandler<ObtenerDatosDepartamentoPorIdDepartamentoConsulta,List<RespuestaConsultaPorDepartamento>>,ObtenerDatosDepartamentoPorIdDepartamentoManejador>();
 
 builder.Services.AddSingleton<IMongoClient>(_ =>
 {
     var connectionString = configuracion.GetConnectionString("MongoDbConnection");
     return new MongoClient(connectionString);
 });
+
 
 builder.Services.AddSingleton<IMongoConexionRepositorio, MongoConexionRepositorio>(_ =>
 {

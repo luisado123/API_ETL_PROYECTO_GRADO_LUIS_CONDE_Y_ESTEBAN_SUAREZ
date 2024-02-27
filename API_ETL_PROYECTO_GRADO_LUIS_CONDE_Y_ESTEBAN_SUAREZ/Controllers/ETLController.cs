@@ -37,10 +37,10 @@ namespace API_ETL_PROYECTO_GRADO_LUIS_CONDE_Y_ESTEBAN_SUAREZ.Controllers
 
 
         [HttpGet("ObtenerDataLakesPorDepartamento")]
-        public async Task<List<RespuestaConsultaPorDepartamento>> ObtenerDataPorDepartamento([FromQuery] ObtenerDatosDepartamentoPorIdDepartamentoComando solicitud)=> await _mediator.Send(solicitud);
+        public async Task<List<RespuestaConsultaPorDepartamento>> ObtenerDataPorDepartamento([FromQuery] ObtenerDatosDepartamentoPorIdDepartamentoConsulta solicitud)=> await _mediator.Send(solicitud);
 
         [HttpGet("ObtenerDataFinalDataSetPorDepartamento")]
-        public async Task<RespuestaConsultaPorDepartamento> ObtenerDataFinalDataSetPorDepartamento([FromQuery] ObtenerDataSetPorIdDepartamentoComando solicitud) => await _mediator.Send(solicitud);
+        public async Task<RespuestaConsultaPorDepartamento> ObtenerDataFinalDataSetPorDepartamento([FromQuery] ObtenerDataSetPorIdDepartamentoConsulta solicitud) => await _mediator.Send(solicitud);
 
 
 
